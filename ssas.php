@@ -14,7 +14,7 @@ class Ssas {
     private static $mysqlUser = 'root';
     private static $mysqlPass = 'ssas';
     private static $mysqlDb = 'ssas';
-    private static $key = "sUp3r5ecr3t";
+    private static $key = "1bac7bc201c17b19e915760896f09cea48a089da5955a7205ba8f52b4fcdbd224cf4b01c22139e96e3d1838dd388ae821980e4bd02a6d4ce088b181b9edb0566";
     private static $data;
     private static $image_dir = "/var/www/html/uploads/";
     private $db;
