@@ -287,16 +287,14 @@ class Ssas {
     }
 
 	// This function saves the image to a file with the corresponding image id as the name.
-	// TODO: Find out how to handle the file permissions.
 	function save_image($img, $iid){
 		$data = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $img));
 		$file = self::$image_dir.$iid;
 		file_put_contents($file, $data);
-		chmod($file, 0777); // This works for now, but probably isn't necessary... right?
+		chmod($file, 0444);
 	}
 
 	// This function loads the image file with the corresponding image id.
-	// TODO: Find out how to handle the file permissions.
 	function loadImage($iid){
 		$file = self::$image_dir.$iid;
 		$type = pathinfo($file, PATHINFO_EXTENSION);	
