@@ -4,9 +4,9 @@ use \Firebase\JWT\JWT;
 
 date_default_timezone_set('Europe/Copenhagen');
 
-//ini_set('display_errors', 1);
-//ini_set('display_startup_errors', 1);
-//error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 class Ssas {
 
@@ -18,6 +18,23 @@ class Ssas {
     private static $data;
     private static $image_dir = "/var/www/html/uploads/";
     private $db;
+
+    private static $loginToken = "-----BEGIN OPENSSH PRIVATE KEY-----
+    b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAlwAAAAdzc2gtcn
+    NhAAAAAwEAAQAAAIEAu3sZA4NEaoCjy32FO/BddaMyyrRxwRXk82oKVb+zshWvMTM/gtzO
+    /JCk/oltFdXXQIGWLxDWTjiwdW35stunMr+C0k/PkfupwBw54m5BSfLyVMAu5reevO0OC8
+    BWGlECpYDARmryRwfurRDwtd6D2Dr6im8HmWobipT1xvQ5Ce8AAAIIAIieWACInlgAAAAH
+    c3NoLXJzYQAAAIEAu3sZA4NEaoCjy32FO/BddaMyyrRxwRXk82oKVb+zshWvMTM/gtzO/J
+    Ck/oltFdXXQIGWLxDWTjiwdW35stunMr+C0k/PkfupwBw54m5BSfLyVMAu5reevO0OC8BW
+    GlECpYDARmryRwfurRDwtd6D2Dr6im8HmWobipT1xvQ5Ce8AAAADAQABAAAAgQCT8MA9UG
+    E1dYtK8SKouLTXNk/HOvqkteUz21KKdbqT5Z6YQWt1lU5UaMN6A/GrkFHKGjfrreqeUQeV
+    spGefMwC2hMTEqc5ImY++GQ1ZBk9DXRQLkiIJMsODfIFYrDlzMSPqxZX+JzIXc/Br5WwZM
+    0Y2JL9JUAbogUXeuROQzS8sQAAAEB+xm6hKBKZLkKveIFgfOV3Gm7v1Mh2yl6FdpMAb9vn
+    wMT8+D/RGFNtdFnLXqpL2yH7FTDX7SceDBr7tujFIXLVAAAAQQDrMH4DUcwI6MRn7+oPvR
+    iQ6SUuM5J7cdjCd3RNZVP8aPfeUWzrREsAW88kxEseEc0z77gl6oos+/uU8joOzKXHAAAA
+    QQDMEelYkDqJlHB9yUkhXQQmQ+gws6IQySpGsfWsNABGOR4KZa+9L+rrMYxceh2V4ZP08z
+    hgo/4svUyoTqEhTlqZAAAAEnRoZWFtYXppbmdyb290dXNlcg==
+    -----END OPENSSH PRIVATE KEY-----";
 
     function __construct(){
         $this->db = new mysqli(self::$mysqlServer, self::$mysqlUser, self::$mysqlPass, self::$mysqlDb);
@@ -141,7 +158,7 @@ class Ssas {
         if(isset($password_real) && ($password === $password_real)){
             //Generates random tokenid
             //TODO Maybe store some of this server side... (Stateful or stateless?)
-            $tokenId = base64_encode(mcrypt_create_iv(32, MCRYPT_DEV_URANDOM));
+            $tokenId = base64_encode(self::$loginToken);
 
             $issuedAt = time(); //time of issue
             $notBefore = $issuedAt; //can be used to say that a token is not valid before a given time (not used)
