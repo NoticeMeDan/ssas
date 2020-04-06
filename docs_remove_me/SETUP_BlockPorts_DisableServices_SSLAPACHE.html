@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome file</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h1 id="block-all-ports-except-22-80-443.">Block all ports except 22, 80, 443.</h1>
+<pre><code>&gt; sudo ufw default deny incoming
+</code></pre>
+<pre><code>&gt; sudo ufw default allow outgoing
+</code></pre>
+<pre><code>&gt; sudo ufw allow 22
+</code></pre>
+<pre><code>&gt; sudo ufw allow 80
+</code></pre>
+<pre><code>&gt; sudo ufw allow 443
+</code></pre>
+<pre><code>&gt; sudo ufw enable
+</code></pre>
+<h2 id="test-by-running">Test by running</h2>
+<pre><code>&gt;sudo ufw status verbose
+</code></pre>
+<h1 id="disable-services">Disable services</h1>
+<h3 id="telnet">Telnet</h3>
+<pre><code>&gt; sudo nano /etc/xinetd.d/telnet
+</code></pre>
+<p>Set <em>disable=yes</em></p>
+<h3 id="section"></h3>
+<h1 id="selfsigned-ssl-apache">Selfsigned SSL Apache</h1>
+<p>Configure your Apache server to use strong encryption for client connections.</p>
+<pre><code>&gt; sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+</code></pre>
+<p>Set <strong>Common name:</strong> localhost</p>
+<pre><code>sudo nano /etc/apache2/conf-available/ssl-params.conf
+</code></pre>
+<p>Paste the following into the file and save it.</p>
+<pre><code>SSLCipherSuite EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH
+SSLProtocol All -SSLv2 -SSLv3 -TLSv1 -TLSv1.1
+SSLHonorCipherOrder On
+# Disable preloading HSTS for now.  You can use the commented out header line that includes
+# the "preload" directive if you understand the implications.
+# Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+Header always set X-Frame-Options DENY
+Header always set X-Content-Type-Options nosniff
+# Requires Apache &gt;= 2.4
+SSLCompression off
+SSLUseStapling on
+SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
+# Requires Apache &gt;= 2.4.11
+SSLSessionTickets Off
+</code></pre>
+<pre><code>sudo cp /etc/apache2/sites-available/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf.bak
+</code></pre>
+<pre><code>sudo nano /etc/apache2/sites-available/default-ssl.conf
+</code></pre>
+<p>Make sure it looks like this</p>
+<pre><code>&lt;IfModule mod_ssl.c&gt;
+        &lt;VirtualHost _default_:443&gt;
+                ServerAdmin webmaster@localhost
+                ServerName localhost
+
+                DocumentRoot /var/www/html
+
+                ErrorLog ${APACHE_LOG_DIR}/error.log
+                CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+                SSLEngine on
+
+                SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
+                SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+
+                &lt;FilesMatch "\.(cgi|shtml|phtml|php)$"&gt;
+                                SSLOptions +StdEnvVars
+                &lt;/FilesMatch&gt;
+                &lt;Directory /usr/lib/cgi-bin&gt;
+                                SSLOptions +StdEnvVars
+                &lt;/Directory&gt;
+
+        &lt;/VirtualHost&gt;
+&lt;/IfModule&gt;
+</code></pre>
+<pre><code>sudo nano /etc/apache2/sites-available/000-default.conf
+</code></pre>
+<p>Add the following line:</p>
+<pre><code>&lt;VirtualHost *:80&gt;
+        . . .
+
+        Redirect permanent "/" "https://localhost/"
+
+        . . .
+&lt;/VirtualHost&gt;
+</code></pre>
+<pre><code>sudo a2enmod ssl
+</code></pre>
+<pre><code>sudo a2enmod headers
+</code></pre>
+<pre><code>sudo a2ensite default-ssl
+</code></pre>
+<pre><code>sudo a2enconf ssl-params
+</code></pre>
+<p>Test to see if your config is OK</p>
+<pre><code>sudo apache2ctl configtest
+</code></pre>
+<p>Restart apache</p>
+<pre><code>sudo systemctl restart apache2
+</code></pre>
+<p>Because the certificate you created isn’t signed by one of your browser’s trusted certificate authorities, you will likely see a warning now when visiting <em>localhost</em>. This is expected and normal. We are only interested in the encryption aspect of our certificate, not the third party validation of our host’s authenticity.</p>
+</div>
+</body>
+
+</html>
